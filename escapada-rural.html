@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🏡 Escapada Rural</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #1D9E75;
+    --green-dark: #0F6E56;
+    --green-light: #E1F5EE;
+    --green-text: #0F6E56;
+    --red-light: #FCEBEB;
+    --red: #A32D2D;
+    --bg: #F7F6F2;
+    --surface: #FFFFFF;
+    --border: rgba(0,0,0,0.1);
+    --border-strong: rgba(0,0,0,0.18);
+    --text: #1a1a1a;
+    --text-muted: #666;
+    --text-faint: #999;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 3rem;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 1.25rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .header-inner {
+    max-width: 600px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .header-title { display: flex; align-items: center; gap: 10px; }
+  .header-title h1 { font-size: 18px; font-weight: 600; }
+  .header-title p { font-size: 13px; color: var(--text-muted); margin-top: 1px; }
+
+  .stats-bar {
+    display: flex;
+    gap: 6px;
+  }
+
+  .stat-pill {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 99px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .stat-pill span { color: var(--text); font-weight: 600; }
+
+  main {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 1.25rem 1rem;
+  }
+
+  /* New category bar */
+  .new-cat-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1.25rem;
+  }
+
+  .new-cat-bar input {
+    flex: 1;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    outline: none;
+  }
+  .new-cat-bar input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(29,158,117,0.12); }
+  .new-cat-bar input::placeholder { color: var(--text-faint); }
+
+  .btn-new-cat {
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .btn-new-cat:hover { background: var(--bg); border-color: var(--border-strong); }
+
+  /* Category block */
+  .cat-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .cat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 16px;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+    transition: background 0.1s;
+  }
+  .cat-header:hover { background: #fafafa; }
+  .cat-header.open { border-bottom-color: var(--border); }
+
+  .cat-header-left { display: flex; align-items: center; gap: 10px; }
+  .cat-emoji { font-size: 20px; line-height: 1; }
+  .cat-label { font-size: 15px; font-weight: 600; }
+  .cat-count {
+    font-size: 12px;
+    color: var(--text-muted);
+    background: var(--bg);
+    padding: 2px 8px;
+    border-radius: 99px;
+    border: 1px solid var(--border);
+  }
+
+  .cat-header-right { display: flex; align-items: center; gap: 8px; }
+
+  .btn-del-cat {
+    width: 28px; height: 28px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text-faint);
+    font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s;
+  }
+  .btn-del-cat:hover { background: var(--red-light); color: var(--red); border-color: #f09595; }
+
+  .chevron {
+    font-size: 17px;
+    color: var(--text-faint);
+    transition: transform 0.2s;
+    display: flex; align-items: center;
+  }
+  .chevron.open { transform: rotate(180deg); }
+
+  /* Items */
+  .cat-body { padding: 0 16px 12px; }
+
+  .item-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .item-row:last-of-type { border-bottom: none; }
+
+  .check-btn {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-strong);
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    color: transparent;
+    transition: all 0.15s;
+  }
+  .check-btn.checked { background: var(--green); border-color: var(--green); color: white; }
+
+  .item-name {
+    flex: 1;
+    font-size: 14px;
+    color: var(--text);
+  }
+  .item-row.done .item-name {
+    text-decoration: line-through;
+    color: var(--text-faint);
+  }
+
+  .item-who {
+    font-size: 12px;
+    padding: 2px 9px;
+    border-radius: 99px;
+    white-space: nowrap;
+    background: var(--green-light);
+    color: var(--green-text);
+    font-weight: 500;
+  }
+  .item-who.unassigned {
+    background: var(--bg);
+    color: var(--text-faint);
+    border: 1px solid var(--border);
+  }
+
+  .btn-del-item {
+    width: 26px; height: 26px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--text-faint);
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s;
+    flex-shrink: 0;
+  }
+  .btn-del-item:hover { background: var(--red-light); color: var(--red); }
+
+  /* Add item row */
+  .add-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .add-row input {
+    padding: 8px 10px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    outline: none;
+    min-width: 0;
+  }
+  .add-row input:focus { border-color: var(--green); background: white; box-shadow: 0 0 0 3px rgba(29,158,117,0.1); }
+  .add-row input::placeholder { color: var(--text-faint); }
+  .add-row .inp-item { flex: 2; }
+  .add-row .inp-who { flex: 1; }
+
+  .btn-add-item {
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.1s;
+  }
+  .btn-add-item:hover { background: var(--green-dark); }
+
+  .empty-msg {
+    font-size: 13px;
+    color: var(--text-faint);
+    padding: 8px 0 4px;
+    font-style: italic;
+  }
+
+  .sync-bar {
+    text-align: right;
+    font-size: 12px;
+    color: var(--text-faint);
+    margin-top: 12px;
+    min-height: 18px;
+  }
+
+  /* Mobile tweaks */
+  @media (max-width: 480px) {
+    .stats-bar { display: none; }
+    .add-row { flex-wrap: wrap; }
+    .add-row .inp-item { flex: 1 1 100%; }
+    .add-row .inp-who { flex: 1; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-title">
+      <span style="font-size:24px">🏡</span>
+      <div>
+        <h1>Escapada rural</h1>
+        <p>Lista colaborativa del grupo</p>
+      </div>
+    </div>
+    <div class="stats-bar">
+      <div class="stat-pill">Total: <span id="stat-total">0</span></div>
+      <div class="stat-pill">✓ <span id="stat-done">0</span></div>
+      <div class="stat-pill">👤 <span id="stat-people">0</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="new-cat-bar">
+    <input type="text" id="new-cat-input" placeholder="Nueva categoría (ej: Juegos, Medicinas...)" maxlength="30" />
+    <button class="btn-new-cat" onclick="addCategory()">+ Añadir categoría</button>
+  </div>
+
+  <div id="cats-container"></div>
+  <div class="sync-bar" id="sync-msg"></div>
+</main>
+
+<script>
+const STORAGE_KEY = 'escapada_rural_shared';
+const STORAGE_URL = 'https://api.jsonbin.io/v3/b';
+
+const CAT_EMOJIS = {
+  'comida':'🍕','cena':'🍽️','desayuno':'☕','bebida':'🍺',
+  'menaje':'🍳','juegos':'🎲','limpieza':'🧹','ropa':'👕',
+  'higiene':'🧴','deportes':'⚽','medicin':'💊','primeros':'🩹','otros':'📦'
+};
+
+function catEmoji(n) {
+  const k = n.toLowerCase();
+  for (const [key, em] of Object.entries(CAT_EMOJIS)) {
+    if (k.includes(key)) return em;
+  }
+  return '📋';
+}
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+// ── State ──────────────────────────────────────────────
+let data = {
+  categories: ['Comida','Cena','Desayuno','Bebida','Menaje'],
+  items: [],
+  collapsed: {}
+};
+
+// ── LocalStorage (fallback / fast local) ───────────────
+function saveLocal() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e){}
+}
+function loadLocal() {
+  try {
+    const s = localStorage.getItem(STORAGE_KEY);
+    if (s) data = JSON.parse(s);
+  } catch(e){}
+}
+
+// ── Render ─────────────────────────────────────────────
+function render() {
+  const done   = data.items.filter(i => i.checked).length;
+  const people = [...new Set(data.items.map(i=>i.who).filter(Boolean))].length;
+  document.getElementById('stat-total').textContent  = data.items.length;
+  document.getElementById('stat-done').textContent   = done;
+  document.getElementById('stat-people').textContent = people;
+
+  const container = document.getElementById('cats-container');
+  container.innerHTML = data.categories.map(cat => {
+    const catItems = data.items.filter(i => i.cat === cat);
+    const doneCount = catItems.filter(i => i.checked).length;
+    const isOpen = !data.collapsed[cat];
+    const safeCat = esc(cat);
+    return `
+<div class="cat-block">
+  <div class="cat-header ${isOpen?'open':''}" onclick="toggleCat('${safeCat}')">
+    <div class="cat-header-left">
+      <span class="cat-emoji">${catEmoji(cat)}</span>
+      <span class="cat-label">${safeCat}</span>
+      <span class="cat-count">${doneCount}/${catItems.length}</span>
+    </div>
+    <div class="cat-header-right">
+      <button class="btn-del-cat" onclick="event.stopPropagation();deleteCategory('${safeCat}')" title="Eliminar categoría">🗑</button>
+      <span class="chevron ${isOpen?'open':''}">⌄</span>
+    </div>
+  </div>
+  ${isOpen ? `<div class="cat-body">
+    ${catItems.length === 0
+      ? '<p class="empty-msg">Sin items aún — añade el primero abajo</p>'
+      : catItems.map(item => `
+        <div class="item-row ${item.checked?'done':''}">
+          <button class="check-btn ${item.checked?'checked':''}" onclick="toggleItem('${item.id}')">${item.checked?'✓':''}</button>
+          <span class="item-name">${esc(item.name)}</span>
+          <span class="item-who ${item.who?'':'unassigned'}">${item.who?'👤 '+esc(item.who):'sin asignar'}</span>
+          <button class="btn-del-item" onclick="deleteItem('${item.id}')" title="Eliminar">✕</button>
+        </div>`).join('')
+    }
+    <div class="add-row">
+      <input class="inp-item" type="text" id="inp-name-${safeCat}" placeholder="¿Qué hay que llevar?" maxlength="60"
+        onkeydown="if(event.key==='Enter')addItem('${safeCat}')" />
+      <input class="inp-who" type="text" id="inp-who-${safeCat}" placeholder="¿Quién?" maxlength="25"
+        onkeydown="if(event.key==='Enter')addItem('${safeCat}')" />
+      <button class="btn-add-item" onclick="addItem('${safeCat}')">+ Añadir</button>
+    </div>
+  </div>` : ''}
+</div>`;
+  }).join('');
+}
+
+// ── Actions ────────────────────────────────────────────
+function toggleCat(cat) {
+  data.collapsed[cat] = !data.collapsed[cat];
+  render(); saveLocal();
+}
+
+function addCategory() {
+  const inp = document.getElementById('new-cat-input');
+  const name = inp.value.trim();
+  if (!name) { inp.focus(); return; }
+  if (data.categories.map(c=>c.toLowerCase()).includes(name.toLowerCase())) {
+    inp.select(); return;
+  }
+  data.categories.push(name);
+  inp.value = '';
+  render(); saveLocal();
+}
+
+function deleteCategory(cat) {
+  const hasItems = data.items.filter(i=>i.cat===cat).length > 0;
+  if (hasItems && !confirm(`¿Eliminar "${cat}" y todos sus items?`)) return;
+  data.categories = data.categories.filter(c=>c!==cat);
+  data.items = data.items.filter(i=>i.cat!==cat);
+  delete data.collapsed[cat];
+  render(); saveLocal();
+}
+
+function addItem(cat) {
+  const nameEl = document.getElementById('inp-name-'+cat);
+  const whoEl  = document.getElementById('inp-who-'+cat);
+  if (!nameEl) return;
+  const name = nameEl.value.trim();
+  if (!name) { nameEl.focus(); return; }
+  data.items.push({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+    name,
+    who: whoEl.value.trim(),
+    cat,
+    checked: false,
+    ts: Date.now()
+  });
+  nameEl.value = ''; whoEl.value = '';
+  nameEl.focus();
+  render(); saveLocal();
+}
+
+function toggleItem(id) {
+  const item = data.items.find(i=>i.id===id);
+  if (item) { item.checked = !item.checked; render(); saveLocal(); }
+}
+
+function deleteItem(id) {
+  data.items = data.items.filter(i=>i.id!==id);
+  render(); saveLocal();
+}
+
+// ── Sync msg ───────────────────────────────────────────
+function showSync(msg, dur=2500) {
+  const el = document.getElementById('sync-msg');
+  el.textContent = msg;
+  if (dur) setTimeout(()=>el.textContent='', dur);
+}
+
+// ── Cross-tab sync via localStorage + storage event ───
+window.addEventListener('storage', e => {
+  if (e.key === STORAGE_KEY && e.newValue) {
+    try {
+      const remote = JSON.parse(e.newValue);
+      data = remote;
+      render();
+      showSync('↻ Lista actualizada');
+    } catch(err){}
+  }
+});
+
+// ── Keyboard shortcut: Enter on new-cat-input ─────────
+document.getElementById('new-cat-input')
+  .addEventListener('keydown', e => { if(e.key==='Enter') addCategory(); });
+
+// ── Init ───────────────────────────────────────────────
+loadLocal();
+render();
+showSync('✓ Lista cargada', 2000);
+</script>
+</body>
+</html>
